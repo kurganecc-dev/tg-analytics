@@ -24,6 +24,12 @@ function json(data, status = 200, extra = {}) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // кому можно: страницы сервиса, file:// (Origin: null) и запросы без Origin (curl, скрипты)
+    const allow = String((env && env.ALLOWED_ORIGINS) || '*').split(',').map(v => v.trim()).filter(Boolean);
+    const origin = request.headers.get('Origin');
+    if (!allow.includes('*') && origin && origin !== 'null' && !allow.includes(origin)) {
+      return json({ error: 'источник не разрешён' }, 403);
+    }
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
     if (url.pathname === '/health') {
