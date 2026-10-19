@@ -45,16 +45,15 @@
     const hint = document.getElementById('url-hint');
     const btn = document.getElementById('btn-load-url');
     if (API_OK === 'remote') {
-      if (hint) hint.innerHTML = 'Загрузку каналов делает облачный сервис (Cloudflare Worker): он скачивает и разбирает ' +
-        'страницы t.me, браузер только собирает отчёт. Локальный сервер и этот Mac не нужны — можно открывать ' +
-        'с телефона. Глубина истории — поле «за N мес.».';
-      if (btn) { btn.textContent = 'Загрузить канал'; btn.title = 'Страницы скачивает и разбирает облако'; }
+      if (hint) hint.innerHTML = 'Готово к работе: страницы канала скачивает и разбирает облачный сервис, ' +
+        'браузер собирает отчёт. Можно вставлять ссылку — глубина задаётся полем «за N мес.».';
+      if (btn) { btn.textContent = 'Разобрать канал'; btn.title = 'Страницы скачивает и разбирает облако'; }
       return;
     }
     if (API_OK === 'local') {
-      if (hint) hint.innerHTML = 'Канал грузит локальный сервер (<code>serve.py</code>): он отдаёт и страницу, и API. ' +
+      if (hint) hint.innerHTML = 'Готово к работе: канал скачивает локальный сервер (<code>serve.py</code>). ' +
         'Глубина истории — поле «за N мес.».';
-      if (btn) { btn.textContent = 'Загрузить канал'; btn.title = 'Отвечает локальный сервер'; }
+      if (btn) { btn.textContent = 'Разобрать канал'; btn.title = 'Отвечает локальный сервер'; }
       return;
     }
     if (hint) hint.innerHTML = location.protocol === 'file:'
@@ -63,7 +62,7 @@
       : 'Ссылка на канал не работает на этом адресе: здесь нет API. Вы открыли обычную статику ' +
         '(<code>python3 -m http.server</code> или хостинг). Запустите <code>python3 scripts/serve.py</code> — ' +
         'он отдаёт и страницу, и загрузку канала. Либо загрузите выгрузку файлом.';
-    if (btn) { btn.textContent = 'Только через serve.py'; btn.title = 'Нужен python3 scripts/serve.py'; }
+    if (btn) { btn.textContent = 'Нужен сервер'; btn.title = 'Ссылка работает через python3 scripts/serve.py или облачный воркер'; }
   }
   const state = { datasets: [], active: 0, model: null, filtered: [] };
 
@@ -86,17 +85,30 @@
         if (state.datasets.length) { showApp(); return render(); }
       }
     } catch (e) { /* file:// — fetch запрещён, ждём ручную загрузку */ }
-    showLoader(window.location.protocol === 'file:'
-      ? 'Файл открыт напрямую (file://), поэтому авто-загрузка данных недоступна. Перетащите .jsonl сюда или выберите файл — либо откройте отчёт через локальный сервер: python3 -m http.server 8000 в папке сервиса.'
-      : 'Положите рядом файл data/report-data.json или перетащите .jsonl в окно.');
+    showWelcome();
+  }
+
+  const WELCOME_MSG = 'Перетащите файл в окно или выберите вручную. Можно несколько каналов сразу — '
+    + 'тогда они сравниваются между собой. Формат: {channel, post_id, text, date, views, reactions, url}.';
+  function showWelcome() {
+    // на стартовой странице в шапке не должно быть прочерка и «загрузка…»
+    const n = document.getElementById('channel-name'), sub = document.getElementById('channel-sub');
+    if (n) n.textContent = 'TG Analytics';
+    if (sub) sub.textContent = 'вставьте ссылку на канал или загрузите выгрузку .jsonl';
+    document.body.setAttribute('data-state', 'welcome');   // на стартовой не нужны кнопки отчёта
+    showLoader('');
+    const i = document.getElementById('ch-url');
+    if (i && !i.value) setTimeout(() => i.focus(), 150);
   }
 
   function showLoader(msg) {
     $('#loader').classList.remove('hidden');
-    $('#loader-msg').textContent = msg;
+    if (msg) $('#loader-msg').textContent = msg;
     $('#app').classList.add('hidden');
+    applyServerMode();
   }
   function showApp() {
+    document.body.removeAttribute('data-state');
     $('#loader').classList.add('hidden');
     $('#app').classList.remove('hidden');
   }
@@ -1775,7 +1787,7 @@
     $('#btn-ab').addEventListener('click', runAB);
     $('#btn-plan').addEventListener('click', runPlan);
     $('#btn-onepager').addEventListener('click', buildOnePager);
-    $('#btn-reset').addEventListener('click', () => { state.datasets = []; state.active = 0; showLoader('Перетащите .jsonl с постами или выберите файл.'); });
+    $('#btn-reset').addEventListener('click', () => { state.datasets = []; state.active = 0; showWelcome(); });
   }
 
   document.addEventListener('DOMContentLoaded', () => { wire(); boot(); });

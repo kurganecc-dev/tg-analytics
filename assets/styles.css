@@ -249,3 +249,42 @@ body.print-exec #onepager-preview{display:block !important}
 /* переключатель оформления виден в любой теме */
 html:not([data-theme="xp"]) #theme-toggle{border:1px solid var(--accent);color:var(--accent);white-space:nowrap}
 html:not([data-theme="xp"]) #theme-toggle:hover{background:rgba(42,114,238,.14)}
+
+/* ---------- стартовый экран: приветствие и загрузка по ссылке ---------- */
+.welcome{padding:26px 20px 34px}
+.welcome-card{max-width:860px;margin:0 auto;padding:26px 28px;text-align:left}
+.welcome-head{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
+.welcome-icon{
+  width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:12px;font-size:22px;
+  background:linear-gradient(135deg,var(--accent),#7a3cff);color:#fff
+}
+.welcome h2{margin:0 0 6px;font-size:20px}
+.welcome-sub{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55;max-width:640px}
+.welcome-main{margin:18px 0 4px}
+.welcome-label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.welcome .url-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0}
+.welcome .url-row input[type="text"]{flex:1 1 320px;min-width:220px}
+.welcome-or{display:flex;align-items:center;gap:10px;margin:20px 0 14px;color:var(--muted);font-size:12px}
+.welcome-or::before,.welcome-or::after{content:'';flex:1;height:1px;background:var(--border)}
+.welcome-file{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.welcome-file b{font-size:13.5px}
+.welcome-file .dim{margin:4px 0 0}
+.welcome-file-actions{display:flex;gap:8px;flex-wrap:wrap}
+.welcome-feats{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;margin:18px 0 4px;padding-left:18px;font-size:13px;color:var(--fg)}
+.welcome-feats li{line-height:1.45}
+.welcome-foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--border-soft);font-size:12px}
+@media (max-width:760px){
+  .welcome-feats{grid-template-columns:1fr}
+  .welcome{padding:12px 8px 20px}
+  .welcome-card{padding:16px 14px}
+  .welcome-icon{width:36px;height:36px;font-size:17px;border-radius:9px}
+  .welcome h2{font-size:17px}
+}
+
+/* стартовая страница: кнопки отчёта бессмысленны, пока нет данных */
+body[data-state="welcome"] .subs-input,
+body[data-state="welcome"] #btn-export,
+body[data-state="welcome"] #btn-print,
+body[data-state="welcome"] #btn-reset,
+body[data-state="welcome"] #btn-url,
+body[data-state="welcome"] #channel-tabs{display:none !important}

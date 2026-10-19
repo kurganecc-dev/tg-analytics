@@ -108,28 +108,53 @@
 
 <div id="channel-tabs" class="chips hidden"></div>
 
-<section id="loader" class="loader">
-  <div class="drop" id="drop">
-    <div class="drop-icon">⇪</div>
-    <h2>Перетащите выгрузку канала (.jsonl)</h2>
-    <p id="loader-msg">Поддерживается формат отчёта: {channel, post_id, text, date, views, reactions, url}.
-      Можно несколько файлов сразу — тогда каналы сравниваются между собой.</p>
-    <label class="btn accent">
-      Выбрать файл
-      <input type="file" id="file-input" accept=".jsonl,.json,.txt" multiple hidden>
-    </label>
-    <button class="btn" id="btn-load-picked">Загрузить выбранный файл</button>
+<section id="loader" class="loader welcome">
+  <div class="drop welcome-card" id="drop">
 
-    <div class="url-row">
-      <span class="url-or">или по ссылке</span>
-      <input id="ch-url" type="text" placeholder="https://t.me/канал" spellcheck="false" autocomplete="off">
-      <label class="chk">за <input id="ch-months" type="number" min="1" max="120" value="12"> мес.</label>
-      <button class="btn accent" id="btn-load-url">Загрузить канал</button>
+    <div class="welcome-head">
+      <div class="welcome-icon">▤</div>
+      <div>
+        <h2>Привет! Давайте разберём Telegram-канал</h2>
+        <p class="welcome-sub">Вставьте ссылку — сервис скачает публичные посты и посчитает охват, ER, динамику,
+          темы, стиль и что делать дальше. Регистрация не нужна, ничего не сохраняется на сервере.</p>
+      </div>
     </div>
-    <p class="dim" id="url-hint">Ссылка работает, когда сервис запущен через сервер:
-      <code>python3 scripts/serve.py</code> → <code>http://127.0.0.1:8000</code>. Сервер сам скачает публичные
-      посты канала (текст, даты, просмотры, реакции) — выгрузка файлом при этом не нужна.</p>
-    <p class="dim">Данные обрабатываются в браузере и никуда не отправляются.</p>
+
+    <div class="welcome-main">
+      <label class="welcome-label" for="ch-url">Ссылка на канал</label>
+      <div class="url-row">
+        <input id="ch-url" type="text" placeholder="https://t.me/имя_канала  или  @имя_канала" spellcheck="false" autocomplete="off">
+        <label class="chk">за <input id="ch-months" type="number" min="1" max="120" value="12"> мес.</label>
+        <button class="btn accent" id="btn-load-url">Разобрать канал</button>
+      </div>
+      <p class="dim" id="url-hint">Проверяю, доступна ли загрузка по ссылке…</p>
+    </div>
+
+    <div class="welcome-or"><span>или своя выгрузка</span></div>
+
+    <div class="welcome-file">
+      <div>
+        <b>Файл .jsonl из архива</b>
+        <p class="dim" id="loader-msg">Перетащите файл в окно или выберите вручную. Можно несколько каналов сразу —
+          тогда они сравниваются между собой. Формат: {channel, post_id, text, date, views, reactions, url}.</p>
+      </div>
+      <div class="welcome-file-actions">
+        <label class="btn">Выбрать файл
+          <input type="file" id="file-input" accept=".jsonl,.json,.txt" multiple hidden>
+        </label>
+        <button class="btn" id="btn-load-picked">Загрузить выбранный</button>
+      </div>
+    </div>
+
+    <ul class="welcome-feats">
+      <li>охват, ER, виральность, динамика и переломы тренда</li>
+      <li>темы, рубрики, лучшие слоты, связи и дубли постов</li>
+      <li>оценка черновика и план публикаций на неделю</li>
+      <li>сравнение каналов со статистикой различий</li>
+    </ul>
+
+    <p class="dim welcome-foot">Данные считаются в браузере; страницы канала скачивает облачный сервис.
+      Ничего не публикуется и не хранится.</p>
   </div>
 </section>
 

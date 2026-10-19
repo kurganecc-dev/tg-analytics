@@ -20,7 +20,15 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Есть ли каналы для обновления
+        id: check
+        run: |
+          n=$(grep -cvE '^\s*(#|$)' channels.txt || true)
+          echo "каналов в списке: $n"
+          echo "any=$n" >> "$GITHUB_OUTPUT"
+
       - name: Скачать каналы из channels.txt
+        if: steps.check.outputs.any != '0'
         run: |
           set -euo pipefail
           mkdir -p data
@@ -37,6 +45,7 @@ jobs:
           done < channels.txt
 
       - name: Собрать отчёт и автономный файл
+        if: steps.check.outputs.any != '0'
         run: |
           set -euo pipefail
           # порядок каналов в отчёте = порядок строк в channels.txt (первый канал открывается по умолчанию)
@@ -51,6 +60,7 @@ jobs:
           python3 scripts/build_report.py --embed --out report.html $files
 
       - name: Закоммитить изменения
+        if: steps.check.outputs.any != '0'
         run: |
           set -euo pipefail
           git config user.name  'github-actions[bot]'
