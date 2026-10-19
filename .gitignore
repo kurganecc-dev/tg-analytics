@@ -6,3 +6,7 @@ data/snapshots/
 # исходные выгрузки каналов не публикуем: на сайте нужен только собранный отчёт
 data/*.jsonl
 tests/fixture-subset-2024plus.jsonl
+
+# воркер: зависимости не коммитим
+node_modules/
+.wrangler/

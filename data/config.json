@@ -1,0 +1,4 @@
+{
+  "api": "https://tg-analytics-api.kurganecc.workers.dev",
+  "note": "Облачный API загрузки каналов по ссылке (Cloudflare Worker, worker/). Локальный serve.py, если запущен, имеет приоритет."
+}

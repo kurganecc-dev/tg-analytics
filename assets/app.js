@@ -6,18 +6,41 @@
   const fmt = Charts.fmt;
   // Есть ли на этом адресе сервер с /api/channel. Проверяем фактом, а не по имени хоста:
   // serve.py может быть открыт и по сетевому адресу (--host 0.0.0.0), и тогда ссылка обязана работать.
-  let API_OK = false;
+  let API_OK = false;          // false | 'local' | 'remote'
+  let API_BASE = '';           // облачный воркер, если локального сервера нет
+  async function loadConfig() {
+    const qs = new URLSearchParams(location.search).get('api');   // удобно для проверок и смены адреса
+    if (qs) { API_BASE = qs.replace(/\/$/, ''); return; }
+    try {
+      const r = await fetch('data/config.json', { cache: 'no-store' });
+      if (r.ok) { const j = await r.json(); if (j.api) API_BASE = String(j.api).replace(/\/$/, ''); }
+    } catch (e) { /* конфига нет — работаем без облака */ }
+  }
   async function probeApi() {
     API_OK = false;
-    if (!location.protocol.startsWith('http')) return;      // file:// — API заведомо нет
-    try {
-      const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), 2500);
-      const r = await fetch('api/health', { cache: 'no-store', signal: ctl.signal });
-      clearTimeout(timer);
-      API_OK = r.ok;
-    } catch (e) { API_OK = false; }
+    await loadConfig();
+    // 1) локальный сервер — быстрее и без лимитов; 2) облачный воркер — если локального нет
+    if (location.protocol.startsWith('http')) {
+      try {
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 2500);
+        const r = await fetch('api/health', { cache: 'no-store', signal: ctl.signal });
+        clearTimeout(timer);
+        if (r.ok) { API_OK = 'local'; return; }
+      } catch (e) { /* локального нет */ }
+      // статический хостинг отдаёт index.html вместо API — 404 на /api/health это норма
+    }
+    if (API_BASE) {
+      try {
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 6000);
+        const r = await fetch(API_BASE + '/health', { cache: 'no-store', signal: ctl.signal });
+        clearTimeout(timer);
+        if (r.ok) API_OK = 'remote';
+      } catch (e) { API_OK = false; }
+    }
   }
+  const hasApi = () => Boolean(API_OK);
   function applyServerMode() {
     const hint = document.getElementById('url-hint');
     const btn = document.getElementById('btn-load-url');
@@ -95,11 +118,60 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3800);
   }
 
+  // ---------------- облачная загрузка по ссылке ----------------
+  // Воркер отдаёт по одной странице t.me с готовым разбором; здесь — цикл, граница по месяцам и сборка датасета.
+  async function loadViaCloud(raw, months, onProgress) {
+    const channel = String(raw).trim().replace(/\s/g, '').replace(/^.*?t\.me\/(?:s\/)?/i, '')
+      .replace(/^@/, '').replace(/\/.*$/, '');
+    if (!/^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(channel)) {
+      throw new Error('не похоже на публичную ссылку канала: годится https://t.me/имя_канала или @имя_канала');
+    }
+    const cutoff = Date.now() - months * 30.44 * 86400000;
+    let before = null, pages = 0, next = true;
+    const seen = new Set();
+    const all = [];
+    while (next && pages < 600) {
+      const url = `${API_BASE}/page?channel=${encodeURIComponent(channel)}` + (before ? `&before=${before}` : '');
+      const r = await fetch(url, { cache: 'no-store' });
+      const j = await r.json();
+      if (!r.ok || j.error) throw new Error(j.error || `HTTP ${r.status}`);
+      pages++;
+      for (const p of j.posts || []) {
+        if (seen.has(p.post_id)) continue;
+        seen.add(p.post_id);
+        all.push(p);
+      }
+      onProgress && onProgress(pages, all.length);
+      const stamps = (j.posts || []).map(p => Date.parse(p.date)).filter(t => Number.isFinite(t));
+      if (stamps.length && Math.min(...stamps) <= cutoff) break;      // дошли до границы периода
+      if (!j.next_before) break;
+      before = j.next_before;
+      await new Promise(res => setTimeout(res, 120));                  // вежливая пауза между страницами
+    }
+    const inPeriod = all.filter(p => {
+      const t = Date.parse(p.date);
+      return !Number.isFinite(t) || t >= cutoff;
+    });
+    inPeriod.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.post_id - b.post_id));
+    const withText = inPeriod.filter(p => (p.text || '').trim());
+    if (!withText.length) {
+      throw new Error(`«${channel}»: публичных постов с текстом не нашлось. Канал не существует, закрыт, ` +
+        'приватный или у него отключено веб-превью');
+    }
+    return {
+      name: channel,
+      posts: inPeriod,
+      count: withText.length,
+      media_only: inPeriod.length - withText.length,
+      period: [inPeriod[0].date.slice(0, 10), inPeriod[inPeriod.length - 1].date.slice(0, 10)],
+    };
+  }
+
   // ---------------- загрузка канала по ссылке (через локальный сервер) ----------------
   async function loadByUrl() {
     const raw = ($('#ch-url').value || '').trim();
     if (!raw) { toast('Вставьте ссылку на канал: https://t.me/имя_канала'); return; }
-    if (!API_OK) {
+    if (!hasApi()) {
       toast('Загрузка по ссылке работает через python3 scripts/serve.py: он отдаёт страницу и API. ' +
             'Либо перетащите выгрузку файлом.');
       return;
@@ -118,6 +190,20 @@
     tick();
     const ticker = setInterval(tick, 1000);
     try {
+      if (API_OK === 'remote') {                 // облако: страницы тянет воркер, листает браузер
+        const res = await loadViaCloud(raw, months, (pages, posts) => {
+          $('#url-hint').textContent = `Скачиваю за ${months} мес.: страниц ${pages}, постов ${posts}. Идёт ${Math.round((Date.now() - t0) / 1000)} с…`;
+        });
+        clearInterval(ticker);
+        addDataset(res.name, res.posts, 0);
+        showApp();
+        render();
+        toast(`Загружено ${res.count} постов (${res.period[0]} → ${res.period[1]})`
+          + (res.media_only ? `, пропущено ${res.media_only} постов без текста` : ''));
+        $('#url-hint').textContent = 'Готово. Следующий канал: вставьте другую ссылку и нажмите «Загрузить канал» — '
+          + 'каналы можно сравнивать между собой.';
+        return;
+      }
       const r = await fetch(`api/channel?url=${encodeURIComponent(raw)}&months=${months}`);
       const j = await r.json();
       clearInterval(ticker);
@@ -923,7 +1009,7 @@
   async function renderGrowth() {
     const m = state.model;
     const note = $('#growth-note');
-    if (!API_OK) {
+    if (!hasApi()) {
       note.innerHTML = 'Замеры скорости доступны при запуске через сервер: <code>python3 scripts/serve.py</code>. ' +
         'Сами замеры делаются командой <code>python3 scripts/snapshot.py https://t.me/канал</code>.';
       $('#growth-kpi').innerHTML = ''; $('#tbl-growth').innerHTML = ''; $('#chart-growth').innerHTML = '';

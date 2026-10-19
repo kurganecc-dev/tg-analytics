@@ -1,0 +1,4 @@
+name = "tg-analytics-api"
+main = "index.js"
+compatibility_date = "2026-01-01"
+# бесплатный тариф: 100 000 запросов в день, кеш Cloudflare на 2 минуты

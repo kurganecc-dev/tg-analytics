@@ -1,0 +1,13 @@
+{
+  "name": "tg-analytics-api",
+  "private": true,
+  "type": "module",
+  "description": "Облачный API для загрузки Telegram-каналов по ссылке (Cloudflare Worker)",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
