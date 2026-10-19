@@ -39,7 +39,14 @@ jobs:
       - name: Собрать отчёт и автономный файл
         run: |
           set -euo pipefail
-          files=$(ls data/*.jsonl | tr '\n' ' ')
+          # порядок каналов в отчёте = порядок строк в channels.txt (первый канал открывается по умолчанию)
+          files=""
+          while read -r name months subs; do
+            [ -z "${name:-}" ] && continue
+            case "$name" in \#*) continue ;; esac
+            files="$files data/${name#@}.jsonl"
+          done < channels.txt
+          echo "каналы в отчёте: $files"
           python3 scripts/build_report.py $files
           python3 scripts/build_report.py --embed --out report.html $files
 
