@@ -44,7 +44,19 @@
   function applyServerMode() {
     const hint = document.getElementById('url-hint');
     const btn = document.getElementById('btn-load-url');
-    if (API_OK) return;
+    if (API_OK === 'remote') {
+      if (hint) hint.innerHTML = 'Загрузку каналов делает облачный сервис (Cloudflare Worker): он скачивает и разбирает ' +
+        'страницы t.me, браузер только собирает отчёт. Локальный сервер и этот Mac не нужны — можно открывать ' +
+        'с телефона. Глубина истории — поле «за N мес.».';
+      if (btn) { btn.textContent = 'Загрузить канал'; btn.title = 'Страницы скачивает и разбирает облако'; }
+      return;
+    }
+    if (API_OK === 'local') {
+      if (hint) hint.innerHTML = 'Канал грузит локальный сервер (<code>serve.py</code>): он отдаёт и страницу, и API. ' +
+        'Глубина истории — поле «за N мес.».';
+      if (btn) { btn.textContent = 'Загрузить канал'; btn.title = 'Отвечает локальный сервер'; }
+      return;
+    }
     if (hint) hint.innerHTML = location.protocol === 'file:'
       ? 'Файл открыт напрямую, поэтому загрузка по ссылке недоступна. Запустите <code>python3 scripts/serve.py</code> ' +
         'и откройте <code>http://127.0.0.1:8000</code> — тогда ссылка на канал работает прямо здесь.'
