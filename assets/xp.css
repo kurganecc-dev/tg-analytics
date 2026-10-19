@@ -1,0 +1,531 @@
+/* xp.css — оформление сервиса в стиле Windows XP.
+   Токены взяты с референса (durevpn.com): серый #C3C3C3, фаски inset 2px #F0F0F0/#262626,
+   тёмно-синий #02007F, зелёный #00FF00, пиксельный шрифт Monocraft (OFL 1.1, сабсет в assets/fonts).
+   Всё заперто под [data-theme="xp"] — тёмная тема продолжает работать при переключении. */
+
+@font-face {
+  font-family: 'Monocraft';
+  src: url('fonts/monocraft-subset.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400 700;
+}
+
+[data-theme="xp"] {
+  /* палитра */
+  --face: #c3c3c3;          /* цвет поверхности (референс) */
+  --face-2: #ece9d8;        /* светлая грань XP */
+  --hi: #f0f0f0;            /* светлая фаска */
+  --sh: #262626;            /* тёмная фаска */
+  --sh-2: #7e7e7e;
+  --navy: #02007f;          /* акцент референса */
+  --navy-2: #004aad;
+  --green: #00ff00;
+  --red: #d45033;
+
+  --bg: #3a6ea5;
+  --panel: #c3c3c3;
+  --card: #ffffff;
+  --border: #7e7e7e;
+  --border-soft: #d4d0c8;
+  --fg: #09090b;
+  --muted: #4a4a4a;
+  --accent: #02007f;
+  --brand: #d45033;
+  --radius: 0;
+  /* классическая палитра графиков Windows / Excel 97 — вместо неоновых цветов тёмной темы */
+  --c1: #02007f; --c2: #008080; --c3: #d45033; --c4: #808000; --c5: #800080; --c6: #008000;
+  --c7: #c00000; --c8: #0000a0; --c9: #808080; --c10: #ff8000; --c11: #404040; --c12: #a0a0a0;
+
+  --mono: Monocraft, 'Courier New', monospace;
+  --ui: Tahoma, Verdana, 'Segoe UI', Geneva, sans-serif;
+
+  font-family: var(--ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- рабочий стол ---------- */
+[data-theme="xp"] body {
+  background: #245edb;
+  background-image:
+    radial-gradient(120% 70% at 78% 6%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, #1c5fc4 0%, #4a93e0 42%, #8dc0ee 62%, #7fb24a 63%, #5b9b2e 78%, #3f7a1c 100%);
+  background-attachment: fixed;
+  color: var(--fg);
+  min-height: 100vh;
+  padding: 14px 14px 44px;
+  box-sizing: border-box;
+}
+[data-theme="xp"] body::after {
+  /* холм «Блаженство»: одна кривая, узнаётся сразу */
+  content: '';
+  position: fixed; left: -5%; right: -5%; bottom: 0; height: 34vh; z-index: 0; pointer-events: none;
+  background: radial-gradient(120% 100% at 30% 0%, #86c232 0%, #6aa62c 45%, #4e8a1f 100%);
+  border-radius: 50% 50% 0 0 / 26% 26% 0 0;
+  box-shadow: inset 0 8px 24px rgba(255, 255, 255, .25);
+}
+
+/* ---------- окно ---------- */
+[data-theme="xp"] .xp-desktop { position: relative; z-index: 1; }
+[data-theme="xp"] .window {
+  max-width: 1560px; margin: 0 auto;
+  background: var(--face);
+  border: 3px solid #0831d9;
+  border-top: none;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, .45);
+  overflow: hidden;
+}
+[data-theme="xp"] body[data-window="max"] { padding: 0 0 30px; }
+[data-theme="xp"] .window { margin-bottom: 0; }
+[data-theme="xp"] body[data-window="max"] .window { max-width: none; border-radius: 0; height: calc(100vh - 30px); margin: 0; }
+[data-theme="xp"] body[data-window="max"] .window-body { max-height: calc(100vh - 30px - 27px - 22px - 22px); }
+[data-theme="xp"] body[data-window="min"] .window { display: none; }
+[data-theme="xp"] body[data-window="min"] .xp-restore-hint { display: block; }
+
+[data-theme="xp"] .titlebar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  height: 27px; padding: 0 4px 0 6px;
+  background: linear-gradient(180deg, #0058ee 0%, #3a93ff 8%, #0054e3 40%, #0050dd 88%, #003bb8 100%);
+  border-radius: 6px 6px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -1px 0 rgba(0, 0, 0, .25);
+  user-select: none;
+}
+[data-theme="xp"] .tb-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
+[data-theme="xp"] .tb-icon {
+  width: 16px; height: 16px; flex: none; display: grid; place-items: center;
+  background: linear-gradient(180deg, #fff 0%, #cfd8ea 100%);
+  border: 1px solid #0831d9; font-size: 10px; color: var(--navy);
+}
+[data-theme="xp"] .tb-text {
+  font-family: var(--mono); font-size: 12px; color: #fff; text-shadow: 1px 1px 0 rgba(0, 0, 0, .55);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+[data-theme="xp"] .tb-buttons { display: flex; gap: 2px; }
+[data-theme="xp"] .tbb {
+  width: 21px; height: 21px; padding: 0; cursor: pointer;
+  font-family: var(--ui); font-size: 11px; font-weight: 700; line-height: 1; color: #fff;
+  background: linear-gradient(180deg, #4a9bff 0%, #1268e0 45%, #0a52c8 100%);
+  border: 1px solid #fff; border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+[data-theme="xp"] .tbb:hover { background: linear-gradient(180deg, #6bb0ff 0%, #2b7ff0 45%, #1060d8 100%); }
+[data-theme="xp"] .tbb:active { box-shadow: inset 1px 1px 2px rgba(0, 0, 0, .5); }
+[data-theme="xp"] .tbb.close { background: linear-gradient(180deg, #f08a6a 0%, #d3541f 45%, #a8310d 100%); }
+[data-theme="xp"] .tbb.close:hover { background: linear-gradient(180deg, #ff9c7c 0%, #e4652a 45%, #b93a12 100%); }
+
+/* ---------- строка меню ---------- */
+[data-theme="xp"] .menubar {
+  display: flex; align-items: center; gap: 2px; padding: 2px 3px;
+  background: var(--face-2); border-bottom: 1px solid #aca899;
+  font-size: 12px;
+}
+[data-theme="xp"] .menu { position: relative; }
+[data-theme="xp"] .menu > button {
+  font-family: var(--ui); font-size: 12px; color: var(--fg); background: none; border: 1px solid transparent;
+  padding: 3px 9px; cursor: pointer;
+}
+[data-theme="xp"] .menu > button:hover { background: #316ac5; color: #fff; }
+[data-theme="xp"] .menu.on > button { background: #316ac5; color: #fff; }
+[data-theme="xp"] .dropdown {
+  display: none; position: absolute; left: 0; top: 100%; z-index: 60; min-width: 250px;
+  background: #fff; border: 1px solid #aca899; box-shadow: 3px 3px 0 rgba(0, 0, 0, .18); padding: 2px;
+}
+[data-theme="xp"] .menu.on .dropdown { display: block; }
+[data-theme="xp"] .dropdown button {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  font-family: var(--ui); font-size: 12px; background: none; border: none; padding: 4px 10px; cursor: pointer; color: var(--fg);
+}
+[data-theme="xp"] .dropdown button:hover { background: #316ac5; color: #fff; }
+[data-theme="xp"] .dropdown .sep { height: 1px; background: #d4d0c8; margin: 3px 6px; }
+[data-theme="xp"] .dropdown .key { margin-left: auto; color: #666; font-size: 11px; }
+[data-theme="xp"] .dropdown button:hover .key { color: #dfe8fb; }
+[data-theme="xp"] .dropdown .tick { width: 12px; }
+
+/* ---------- тело окна ---------- */
+[data-theme="xp"] .window-body {
+  background: var(--face);
+  max-height: calc(100vh - 128px);
+  overflow: auto;
+  padding: 0 0 6px;
+}
+
+/* ---------- строка состояния ---------- */
+[data-theme="xp"] .statusbar {
+  display: flex; align-items: center; gap: 4px; padding: 3px 4px;
+  background: var(--face-2); border-top: 1px solid #fff; font-size: 11px;
+}
+[data-theme="xp"] .statusbar .panel {
+  border: 1px solid; border-color: #aca899 #fff #fff #aca899;
+  padding: 1px 8px; color: #333; background: var(--face-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+[data-theme="xp"] .statusbar .panel.grow { flex: 1; min-width: 60px; }
+
+/* ---------- панель задач ---------- */
+[data-theme="xp"] .taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 30px; z-index: 80;
+  display: flex; align-items: center; gap: 6px; padding: 0 3px;
+  background: linear-gradient(180deg, #245edb 0%, #3f8cf3 9%, #245edb 18%, #1941a5 92%, #16389b 100%);
+  box-shadow: inset 0 1px 0 #4a90f7, inset 0 -1px 0 #0b2a6b;
+  font-size: 12px; color: #fff; user-select: none;
+}
+[data-theme="xp"] .start {
+  display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 22px 2px 9px; margin-right: 4px;
+  font-family: var(--mono); font-size: 13px; font-style: italic; color: #fff; text-shadow: 1px 1px 0 rgba(0, 0, 0, .4);
+  background: linear-gradient(180deg, #40b53f 0%, #2f9c2c 45%, #1f7a1c 100%);
+  border: none; border-radius: 0 9px 9px 0; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 1px 0 0 rgba(0, 0, 0, .25);
+}
+[data-theme="xp"] .start:hover { background: linear-gradient(180deg, #52c851 0%, #37ad34 45%, #248e20 100%); }
+[data-theme="xp"] .start.on { background: linear-gradient(180deg, #1f7a1c 0%, #2f9c2c 60%, #40b53f 100%); }
+[data-theme="xp"] .start .flag { width: 14px; height: 14px; background:
+  conic-gradient(from 0deg, #f34 0 25%, #6c6 0 50%, #48f 0 75%, #fc3 0 100%); border-radius: 2px; }
+[data-theme="xp"] .tasks { display: flex; gap: 3px; flex: 1; min-width: 0; }
+[data-theme="xp"] .task-btn {
+  display: flex; align-items: center; gap: 6px; max-width: 240px; height: 22px; padding: 0 9px; overflow: hidden;
+  font-family: var(--ui); font-size: 11px; color: #fff; white-space: nowrap; text-overflow: ellipsis;
+  background: linear-gradient(180deg, #4a8ff0 0%, #2e6fd0 100%);
+  border: 1px solid #1b4fa8; border-radius: 3px; cursor: pointer;
+}
+[data-theme="xp"] .task-btn.active { background: linear-gradient(180deg, #1c4fb3 0%, #2f6bc8 100%); box-shadow: inset 1px 1px 2px rgba(0, 0, 0, .35); }
+[data-theme="xp"] .tray {
+  display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 10px;
+  background: linear-gradient(180deg, #1290e9 0%, #0d7fd8 40%, #0f7fd5 100%);
+  border-left: 1px solid #0b5ba8; box-shadow: inset 1px 0 0 rgba(255, 255, 255, .3);
+  font-family: var(--ui); font-size: 11px; color: #fff;
+}
+[data-theme="xp"] .tray .ico { opacity: .95; font-size: 11px; }
+
+/* меню «Пуск» */
+[data-theme="xp"] .startmenu {
+  position: fixed; left: 3px; bottom: 30px; width: 300px; z-index: 90; display: none;
+  border: 1px solid #0831d9; border-bottom: none; border-radius: 8px 8px 0 0; overflow: hidden;
+  box-shadow: 4px -4px 12px rgba(0, 0, 0, .4);
+  font-size: 12px;
+}
+[data-theme="xp"] .startmenu.on { display: block; }
+[data-theme="xp"] .sm-head {
+  padding: 8px 10px; color: #fff; font-family: var(--mono); font-size: 13px;
+  background: linear-gradient(180deg, #1c62d8 0%, #0c50c8 60%, #083f9e 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+[data-theme="xp"] .sm-body { background: #fff; padding: 4px 0; }
+[data-theme="xp"] .sm-body button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 12px; text-align: left;
+  font-family: var(--ui); font-size: 12px; background: none; border: none; cursor: pointer; color: var(--fg);
+}
+[data-theme="xp"] .sm-body button:hover { background: #316ac5; color: #fff; }
+[data-theme="xp"] .sm-body .sep { height: 1px; background: #d4d0c8; margin: 4px 10px; }
+[data-theme="xp"] .sm-foot {
+  display: flex; justify-content: flex-end; gap: 10px; padding: 6px 10px; color: #fff;
+  background: linear-gradient(180deg, #3f8cf3 0%, #1a56c0 100%);
+}
+[data-theme="xp"] .sm-foot button { background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; }
+[data-theme="xp"] .sm-foot button:hover { text-decoration: underline; }
+
+/* подсказка после сворачивания */
+[data-theme="xp"] .xp-restore-hint {
+  display: none; max-width: 1560px; margin: 0 auto; padding: 10px 14px;
+  background: var(--face-2); border: 2px solid; border-color: #fff #7e7e7e #7e7e7e #fff;
+  font-size: 12px;
+}
+
+/* ---------- типографика ---------- */
+[data-theme="xp"] h1, [data-theme="xp"] h2, [data-theme="xp"] h3 {
+  font-family: var(--mono); letter-spacing: 0; color: var(--fg);
+}
+[data-theme="xp"] h1 { font-size: 17px; }
+[data-theme="xp"] h3 { font-size: 13px; margin-bottom: 8px; }
+[data-theme="xp"] a { color: var(--navy); text-decoration: underline; }
+[data-theme="xp"] code {
+  background: #fff; border: 1px solid #aca899; padding: 0 3px; font-family: var(--mono); font-size: 11px;
+}
+[data-theme="xp"] .dim { color: #4a4a4a; font-size: 11.5px; }
+[data-theme="xp"] .up { color: #007000; }
+[data-theme="xp"] .down { color: #b02020; }
+
+/* ---------- шапка сервиса как панель инструментов ---------- */
+[data-theme="xp"] .top {
+  position: static; padding: 6px 8px; gap: 10px;
+  background: var(--face); border-bottom: 1px solid #aca899;
+}
+[data-theme="xp"] .logo {
+  width: 30px; height: 30px; border-radius: 0;
+  background: linear-gradient(180deg, #3a93ff 0%, #0054e3 100%);
+  border: 2px solid; border-color: #fff #0831d9 #0831d9 #fff;
+  font-family: var(--mono); font-size: 12px; color: #fff;
+}
+[data-theme="xp"] .sub { color: #333; font-size: 11.5px; }
+[data-theme="xp"] .subs-input {
+  background: var(--face); border: 2px solid; border-color: #fff #7e7e7e #7e7e7e #fff;
+  border-radius: 0; padding: 2px 6px; font-size: 11.5px;
+}
+
+/* ---------- кнопки: фаски как на референсе ---------- */
+[data-theme="xp"] .btn {
+  font-family: var(--mono); font-size: 12px; color: var(--fg); border-radius: 0; padding: 4px 12px;
+  background: var(--face); border: 1px solid #0a0a0a;
+  box-shadow: inset -2px -2px 0 0 var(--sh), inset 2px 2px 0 0 var(--hi);
+  cursor: pointer;
+}
+[data-theme="xp"] .btn:hover { background: #cdcdcd; }
+[data-theme="xp"] .btn:active, [data-theme="xp"] .btn.pressed {
+  box-shadow: inset 2px 2px 0 0 var(--sh), inset -2px -2px 0 0 var(--hi);
+  padding: 5px 11px 3px 13px;
+}
+[data-theme="xp"] .btn.accent { background: var(--navy); color: #fff; border-color: #000; }
+[data-theme="xp"] .btn.accent:hover { background: #0b09a0; }
+[data-theme="xp"] .btn.ghost { background: var(--face); }
+[data-theme="xp"] .btn.small { padding: 2px 9px; font-size: 11px; }
+[data-theme="xp"] .btn:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* ---------- поля ввода: утопленные ---------- */
+[data-theme="xp"] input[type="text"], [data-theme="xp"] input[type="number"], [data-theme="xp"] input[type="date"],
+[data-theme="xp"] select, [data-theme="xp"] textarea {
+  font-family: var(--ui); font-size: 12px; color: var(--fg); background: #fff; border-radius: 0;
+  border: 1px solid #7f9db9;
+  box-shadow: inset 1px 1px 0 0 #a9a9a9, inset -1px -1px 0 0 #ffffff;
+  padding: 2px 4px;
+}
+[data-theme="xp"] select {
+  background: var(--face); border: 1px solid #0a0a0a;
+  box-shadow: inset -2px -2px 0 0 var(--sh), inset 2px 2px 0 0 var(--hi);
+  padding: 1px 2px;
+}
+[data-theme="xp"] input:focus, [data-theme="xp"] select:focus, [data-theme="xp"] textarea:focus {
+  outline: 1px dotted #000; outline-offset: -1px;
+}
+[data-theme="xp"] .chk { font-size: 11.5px; color: #1a1a1a; }
+[data-theme="xp"] input[type="checkbox"] { accent-color: #02007f; }
+
+/* ---------- вкладки канала ---------- */
+[data-theme="xp"] .chips { gap: 4px; padding: 6px 8px; border-bottom: 1px solid #aca899; }
+[data-theme="xp"] .chip {
+  font-family: var(--mono); font-size: 11px; border-radius: 0; background: var(--face); color: var(--fg);
+  border: 1px solid #0a0a0a;
+  box-shadow: inset -2px -2px 0 0 var(--sh), inset 2px 2px 0 0 var(--hi);
+}
+[data-theme="xp"] .chip.on {
+  background: var(--navy); color: #fff;
+  box-shadow: inset 2px 2px 0 0 var(--sh), inset -2px -2px 0 0 var(--hi);
+}
+
+/* ---------- загрузчик как диалог ---------- */
+[data-theme="xp"] .loader { padding: 18px; background: none; }
+[data-theme="xp"] .drop {
+  background: var(--face); border: 2px solid; border-color: #fff #7e7e7e #7e7e7e #fff;
+  border-radius: 0; padding: 26px; box-shadow: 4px 4px 0 rgba(0, 0, 0, .25);
+}
+[data-theme="xp"] .drop-icon { font-size: 34px; color: var(--navy); }
+[data-theme="xp"] .url-row { background: var(--face); border: 1px solid #aca899; padding: 8px; }
+
+/* ---------- вкладки разделов: классический таб-контрол ---------- */
+[data-theme="xp"] .tabs {
+  gap: 0; padding: 6px 6px 0; border-bottom: 1px solid #7e7e7e;
+  background: var(--face); flex-wrap: wrap;
+}
+[data-theme="xp"] .tab {
+  font-family: var(--mono); font-size: 11.5px; color: var(--fg); border-radius: 4px 4px 0 0;
+  background: var(--face); border: 1px solid #7e7e7e; border-bottom: none; margin: 0 1px -1px 0;
+  padding: 4px 11px 3px;
+  box-shadow: inset 1px 1px 0 var(--hi);
+}
+[data-theme="xp"] .tab:hover { background: #d0d0d0; }
+[data-theme="xp"] .tab.on {
+  background: var(--face); font-weight: 400; color: var(--navy);
+  border-bottom: 1px solid var(--face); padding-bottom: 4px;
+  box-shadow: inset 1px 1px 0 var(--hi), inset -1px 0 0 #b8b8b8;
+}
+
+/* ---------- панели и карточки: групповые рамки ---------- */
+[data-theme="xp"] .panel {
+  background: var(--face); border: 2px solid; border-color: #fff #7e7e7e #7e7e7e #fff;
+  padding: 10px; gap: 10px;
+}
+[data-theme="xp"] .card, [data-theme="xp"] .grid-2 > .card {
+  background: #fff; border: 1px solid #aca899; border-radius: 0; padding: 10px 12px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, .12);
+}
+[data-theme="xp"] .card > h3 {
+  display: inline-block; background: var(--face); border: 1px solid #aca899;
+  padding: 1px 8px; margin: -18px 0 8px; font-size: 11.5px;
+}
+
+/* ---------- KPI: утопленные панели ---------- */
+[data-theme="xp"] .kpis { gap: 6px; }
+[data-theme="xp"] .kpi {
+  background: var(--face); border: 1px solid #0a0a0a; border-radius: 0; padding: 8px 10px;
+  box-shadow: inset 2px 2px 0 0 var(--sh), inset -2px -2px 0 0 var(--hi);
+}
+[data-theme="xp"] .kpi-label { font-size: 11px; color: #333; }
+[data-theme="xp"] .kpi-value { font-family: var(--mono); font-size: 18px; color: var(--navy); }
+[data-theme="xp"] .kpi-sub { font-size: 11px; color: #444; }
+[data-theme="xp"] .kpi.ok-aud { box-shadow: inset 2px 2px 0 0 var(--sh), inset -2px -2px 0 0 var(--hi), inset 0 0 0 2px #00a000; }
+[data-theme="xp"] .kpi.warn { box-shadow: inset 2px 2px 0 0 var(--sh), inset -2px -2px 0 0 var(--hi), inset 0 0 0 2px var(--red); }
+
+/* ---------- таблицы: классический список ---------- */
+[data-theme="xp"] .tbl, [data-theme="xp"] table {
+  background: #fff; border: 2px solid; border-color: #7e7e7e #fff #fff #7e7e7e;
+  font-size: 12px; border-collapse: collapse; width: 100%;
+}
+[data-theme="xp"] .tbl th, [data-theme="xp"] table th {
+  background: var(--face); border: 1px solid; border-color: #fff #7e7e7e #7e7e7e #fff;
+  font-family: var(--mono); font-size: 11px; font-weight: 400; color: #1a1a1a; text-align: left; padding: 3px 7px;
+  position: sticky; top: 0; z-index: 2;
+}
+[data-theme="xp"] .tbl td, [data-theme="xp"] table td {
+  border-bottom: 1px solid #e4e4e4; border-right: 1px solid #f0f0f0; padding: 3px 7px; color: #111;
+}
+[data-theme="xp"] .tbl tbody tr:nth-child(even) td { background: #f4f7fb; }
+[data-theme="xp"] .tbl tbody tr { cursor: default; }
+[data-theme="xp"] .tbl tbody tr:hover td { background: #e8f0fb; }
+[data-theme="xp"] .tbl tbody tr.sel td { background: #316ac5; color: #fff; }
+[data-theme="xp"] .tbl tbody tr.sel td .dim { color: #dbe6fb; }
+[data-theme="xp"] .pager .btn { font-size: 11px; }
+
+/* ---------- бейджи и находки ---------- */
+[data-theme="xp"] .tag {
+  font-family: var(--mono); font-size: 10.5px; border-radius: 0; padding: 1px 6px;
+  background: var(--face); border: 1px solid #0a0a0a;
+  box-shadow: inset -1px -1px 0 0 var(--sh), inset 1px 1px 0 0 var(--hi); color: #111;
+}
+[data-theme="xp"] .tag.ok { background: #008000; color: #fff; }
+[data-theme="xp"] .tag.ok-aud { background: var(--navy); color: #fff; }
+[data-theme="xp"] .tag.bad { background: var(--red); color: #fff; }
+[data-theme="xp"] .finding {
+  background: #fff; border: 1px solid #aca899; border-left: 3px solid var(--navy); border-radius: 0; font-size: 12px;
+}
+[data-theme="xp"] .finding.good { border-left-color: #008000; }
+[data-theme="xp"] .finding.bad { border-left-color: var(--red); }
+[data-theme="xp"] .finding .dot { background: var(--navy); }
+[data-theme="xp"] .toast {
+  left: auto; right: 12px; bottom: 38px; transform: translateY(12px);
+  background: #ffffe1; color: #000; border: 1px solid #000; border-radius: 0; font-size: 12px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .3);
+}
+[data-theme="xp"] .toast::before { content: '💡 '; }
+[data-theme="xp"] .toast.show { transform: none; }
+
+/* ---------- графики: белое поле, серые сетки ---------- */
+[data-theme="xp"] .chart-host svg, [data-theme="xp"] svg.chart {
+  background: #fff; border: 1px solid #aca899;
+}
+[data-theme="xp"] .chart-host { background: #fff; }
+[data-theme="xp"] .legend span { font-size: 11px; }
+
+/* ---------- черновик и подсказки ---------- */
+[data-theme="xp"] #draft {
+  font-family: var(--mono); font-size: 12px; background: #fff; color: #111;
+  border: 2px solid; border-color: #7e7e7e #fff #fff #7e7e7e; border-radius: 0; box-shadow: none;
+}
+[data-theme="xp"] .empty {
+  background: #fff; border: 1px dashed #aca899; color: #555; border-radius: 0; font-size: 12px;
+}
+[data-theme="xp"] .onepager { border: 2px solid; border-color: #fff #7e7e7e #7e7e7e #fff; box-shadow: 3px 3px 0 rgba(0, 0, 0, .2); }
+
+/* ---------- прокрутка ---------- */
+[data-theme="xp"] ::-webkit-scrollbar { width: 16px; height: 16px; }
+[data-theme="xp"] ::-webkit-scrollbar-track { background: #ececec; border: 1px solid #d4d0c8; }
+[data-theme="xp"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #dfe7f5 0%, #b7c8e6 60%, #8fa9d6 100%);
+  border: 1px solid #6b7fa8;
+}
+[data-theme="xp"] ::-webkit-scrollbar-thumb:hover { background: #c9d8f0; }
+
+/* ---------- печать: только содержимое ---------- */
+@media print {
+  /* в XP-обёртке всё содержимое лежит внутри .xp-desktop: правило «скрыть прямых детей body»
+     из styles.css прятало бы и сам отчёт, поэтому обёртку возвращаем */
+  [data-theme="xp"] body.print-exec > .xp-desktop { display: block !important; }
+  [data-theme="xp"] body.print-exec .window,
+  [data-theme="xp"] body.print-exec .window-body,
+  [data-theme="xp"] body.print-exec #app,
+  [data-theme="xp"] body.print-exec #panel-actions { display: block !important; }
+  /* в print-exec печатается только сводка: остальные панели прячем, иначе выходит 20 листов */
+  [data-theme="xp"] body.print-exec .panel:not(#panel-actions) { display: none !important; }
+  [data-theme="xp"] body.print-exec #channel-tabs { display: none !important; }
+}
+@media print {
+  [data-theme="xp"] body { background: #fff !important; padding: 0 !important; }
+  [data-theme="xp"] body::after { display: none !important; }
+  [data-theme="xp"] .window { border: none !important; box-shadow: none !important; max-width: none; }
+  [data-theme="xp"] .titlebar, [data-theme="xp"] .menubar, [data-theme="xp"] .statusbar,
+  [data-theme="xp"] .taskbar, [data-theme="xp"] .startmenu, [data-theme="xp"] .top, [data-theme="xp"] .tabs { display: none !important; }
+  [data-theme="xp"] .window-body { max-height: none; overflow: visible; background: #fff; }
+  [data-theme="xp"] .card { box-shadow: none; border-color: #999; }
+}
+
+/* ---------- в тёмной теме оболочка окна не участвует в вёрстке ---------- */
+html:not([data-theme="xp"]) .xp-desktop,
+html:not([data-theme="xp"]) .window,
+html:not([data-theme="xp"]) .window-body { display: block; background: none; border: none; box-shadow: none;
+  max-width: none; max-height: none; overflow: visible; padding: 0; margin: 0; }
+html:not([data-theme="xp"]) .titlebar,
+html:not([data-theme="xp"]) .menubar,
+html:not([data-theme="xp"]) .statusbar,
+html:not([data-theme="xp"]) .taskbar,
+html:not([data-theme="xp"]) .startmenu,
+html:not([data-theme="xp"]) .xp-restore-hint { display: none !important; }
+
+/* модальное окно тоже в стиле XP */
+html[data-theme="xp"] .modal { background: rgba(0, 20, 60, .35); }
+html[data-theme="xp"] .modal-box {
+  background: var(--face); border: 3px solid #0831d9; border-radius: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  padding: 0;
+}
+html[data-theme="xp"] .modal-box::before {
+  content: 'Пост'; display: block; padding: 4px 8px; margin: -3px -3px 8px;
+  background: linear-gradient(180deg, #0058ee 0%, #3a93ff 8%, #0054e3 45%, #003bb8 100%);
+  color: #fff; font-family: var(--mono); font-size: 12px; border-radius: 4px 4px 0 0;
+}
+html[data-theme="xp"] .modal-box { padding: 0 12px 12px; }
+html[data-theme="xp"] .modal-close {
+  top: 2px; right: 4px; background: linear-gradient(180deg, #f08a6a, #d3541f); color: #fff;
+  border: 1px solid #fff; border-radius: 3px; width: 20px; height: 18px; line-height: 1; font-size: 11px;
+}
+
+/* ---------- телефон: окно на узком экране ---------- */
+@media (max-width: 760px) {
+  [data-theme="xp"] body { padding: 4px 4px 38px; }
+  [data-theme="xp"] body::after { height: 18vh; }
+  [data-theme="xp"] .window { border-width: 2px; border-radius: 5px 5px 0 0; max-width: none; }
+  [data-theme="xp"] .window-body { max-height: calc(100vh - 88px); }
+  [data-theme="xp"] body[data-window="max"] .window-body { max-height: calc(100vh - 30px - 26px - 22px - 20px); }
+
+  /* вкладки — одной прокручиваемой строкой, как таб-контрол в узком окне */
+  [data-theme="xp"] .tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+  [data-theme="xp"] .tab { flex: none; font-size: 11px; padding: 4px 9px 3px; }
+  [data-theme="xp"] .menubar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  [data-theme="xp"] .menu > button { padding: 3px 7px; }
+
+  /* таблицы не обрезаются, а прокручиваются внутри карточки */
+  [data-theme="xp"] .tbl, [data-theme="xp"] table {
+    display: block; overflow-x: auto; white-space: nowrap; max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  [data-theme="xp"] .tbl thead, [data-theme="xp"] table thead { display: table-header-group; }
+  [data-theme="xp"] .tbl th, [data-theme="xp"] table th { position: sticky; top: 0; }
+
+  [data-theme="xp"] .top { padding: 4px 6px; gap: 6px; }
+  [data-theme="xp"] .top-actions { gap: 5px; }
+  [data-theme="xp"] .btn { font-size: 11px; padding: 4px 8px; }
+  [data-theme="xp"] .logo { width: 26px; height: 26px; font-size: 11px; }
+  [data-theme="xp"] h1 { font-size: 15px; }
+  /* grid/flex-элементы по умолчанию имеют min-width:auto — таблица внутри распирает всю карточку */
+  [data-theme="xp"] .grid-2 > *, [data-theme="xp"] .kpis > *, [data-theme="xp"] .card { min-width: 0; max-width: 100%; }
+  [data-theme="xp"] .card { padding: 8px 9px; }
+  [data-theme="xp"] .post-link, [data-theme="xp"] .tbl a, [data-theme="xp"] table a { word-break: break-word; }
+  [data-theme="xp"] .kpi { padding: 6px 8px; }
+  [data-theme="xp"] .kpi-value { font-size: 16px; }
+  [data-theme="xp"] .grid-2 { grid-template-columns: 1fr; }
+  [data-theme="xp"] .statusbar { font-size: 10px; }
+  [data-theme="xp"] .statusbar .panel:nth-child(n+3) { display: none; }   /* на телефоне оставляем статус и канал */
+  [data-theme="xp"] .taskbar { height: 28px; }
+  [data-theme="xp"] .start { font-size: 12px; padding: 0 16px 2px 8px; }
+  [data-theme="xp"] .tray { padding: 0 6px; gap: 5px; }
+  [data-theme="xp"] .startmenu { width: calc(100vw - 6px); }
+  [data-theme="xp"] .onepager { padding: 16px 18px; }
+  [data-theme="xp"] #draft { min-height: 120px; font-size: 11.5px; }
+}

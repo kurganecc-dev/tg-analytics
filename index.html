@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="xp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302007f'/%3E%3Crect x='2' y='2' width='12' height='3' fill='%230058ee'/%3E%3Crect x='2' y='6' width='5' height='8' fill='%2300a000'/%3E%3Crect x='8' y='6' width='6' height='8' fill='%23c3c3c3'/%3E%3C/svg%3E">
+<title>TG Analytics — разбор Telegram-каналов по выгрузке</title>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/xp.css">
+</head>
+<body>
+
+<div class="xp-desktop">
+
+  <div class="xp-restore-hint" id="xp-restore-hint">
+    Окно свёрнуто в панель задач. <button class="btn small" id="xp-restore">Развернуть окно</button>
+  </div>
+
+  <div class="window" id="xp-window">
+
+    <div class="titlebar" id="xp-titlebar">
+      <div class="tb-left">
+        <span class="tb-icon">▤</span>
+        <span class="tb-text" id="xp-title">TG Analytics — разбор Telegram-каналов</span>
+      </div>
+      <div class="tb-buttons">
+        <button class="tbb min" id="xp-btn-min" title="Свернуть">–</button>
+        <button class="tbb max" id="xp-btn-max" title="Развернуть">□</button>
+        <button class="tbb close" id="xp-btn-close" title="Закрыть">✕</button>
+      </div>
+    </div>
+
+    <div class="menubar" id="xp-menubar">
+      <div class="menu">
+        <button type="button">Файл</button>
+        <div class="dropdown">
+          <button data-cmd="open-file"><span class="tick">▸</span>Открыть выгрузку (.jsonl)…<span class="key">Ctrl+O</span></button>
+          <button data-cmd="open-url"><span class="tick">▸</span>Загрузить канал по ссылке…</button>
+          <div class="sep"></div>
+          <button data-cmd="export"><span class="tick">▸</span>Экспорт JSON</button>
+          <button data-cmd="print"><span class="tick">▸</span>Печать / PDF<span class="key">Ctrl+P</span></button>
+          <div class="sep"></div>
+          <button data-cmd="exit"><span class="tick">▸</span>Свернуть окно</button>
+        </div>
+      </div>
+      <div class="menu">
+        <button type="button">Вид</button>
+        <div class="dropdown">
+          <button data-cmd="tab" data-arg="overview"><span class="tick">▸</span>Обзор</button>
+          <button data-cmd="tab" data-arg="dynamics"><span class="tick">▸</span>Динамика</button>
+          <button data-cmd="tab" data-arg="rhythm"><span class="tick">▸</span>Ритм</button>
+          <button data-cmd="tab" data-arg="topics"><span class="tick">▸</span>Темы</button>
+          <button data-cmd="tab" data-arg="anatomy"><span class="tick">▸</span>Анатомия и стиль</button>
+          <button data-cmd="tab" data-arg="connections"><span class="tick">▸</span>Связи постов</button>
+          <button data-cmd="tab" data-arg="compare"><span class="tick">▸</span>Сравнение каналов</button>
+          <button data-cmd="tab" data-arg="deep"><span class="tick">▸</span>Глубокий анализ</button>
+          <button data-cmd="tab" data-arg="actions"><span class="tick">▸</span>Что делать</button>
+          <button data-cmd="tab" data-arg="posts"><span class="tick">▸</span>Все посты</button>
+          <button data-cmd="tab" data-arg="method"><span class="tick">▸</span>Методика</button>
+          <div class="sep"></div>
+          <button data-cmd="win-max"><span class="tick">▸</span>Развернуть / восстановить окно</button>
+          <div class="sep"></div>
+          <button data-cmd="theme" data-arg="xp" id="xp-theme-xp"><span class="tick">•</span>Оформление: Windows XP</button>
+          <button data-cmd="theme" data-arg="dark" id="xp-theme-dark"><span class="tick"></span>Оформление: тёмная</button>
+        </div>
+      </div>
+      <div class="menu">
+        <button type="button">Данные</button>
+        <div class="dropdown">
+          <button data-cmd="subs"><span class="tick">▸</span>Число подписчиков…</button>
+          <button data-cmd="open-file"><span class="tick">▸</span>Добавить канал файлом…</button>
+          <button data-cmd="open-url"><span class="tick">▸</span>Добавить канал по ссылке…</button>
+          <div class="sep"></div>
+          <button data-cmd="reset"><span class="tick">▸</span>Другой канал (сбросить)</button>
+        </div>
+      </div>
+      <div class="menu">
+        <button type="button">Справка</button>
+        <div class="dropdown">
+          <button data-cmd="tab" data-arg="method"><span class="tick">▸</span>Методика расчётов</button>
+          <button data-cmd="about"><span class="tick">▸</span>О сервисе</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="window-body" id="xp-body">
+<header class="top">
+  <div class="brand">
+    <div class="logo">TG</div>
+    <div>
+      <h1 id="channel-name">—</h1>
+      <div class="sub" id="channel-sub">загрузка…</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <div class="subs-input" title="Число подписчиков нужно для ER по аудитории и охвата">
+      <label for="subs-input">Подписчиков</label>
+      <input id="subs-input" type="number" min="0" step="1" placeholder="напр. 12500" inputmode="numeric">
+      <span id="subs-hint" class="subs-hint"></span>
+    </div>
+    <button id="theme-toggle" class="btn ghost" title="Переключить оформление (Ctrl+Shift+T)">🎨 <span id="theme-toggle-label">тёмное</span></button>
+    <button id="btn-export" class="btn">Экспорт JSON</button>
+    <button id="btn-print" class="btn">Печать / PDF</button>
+    <button id="btn-url" class="btn">+ Канал по ссылке</button>
+    <button id="btn-reset" class="btn ghost">Другой канал</button>
+  </div>
+</header>
+
+<div id="channel-tabs" class="chips hidden"></div>
+
+<section id="loader" class="loader">
+  <div class="drop" id="drop">
+    <div class="drop-icon">⇪</div>
+    <h2>Перетащите выгрузку канала (.jsonl)</h2>
+    <p id="loader-msg">Поддерживается формат отчёта: {channel, post_id, text, date, views, reactions, url}.
+      Можно несколько файлов сразу — тогда каналы сравниваются между собой.</p>
+    <label class="btn accent">
+      Выбрать файл
+      <input type="file" id="file-input" accept=".jsonl,.json,.txt" multiple hidden>
+    </label>
+    <button class="btn" id="btn-load-picked">Загрузить выбранный файл</button>
+
+    <div class="url-row">
+      <span class="url-or">или по ссылке</span>
+      <input id="ch-url" type="text" placeholder="https://t.me/канал" spellcheck="false" autocomplete="off">
+      <label class="chk">за <input id="ch-months" type="number" min="1" max="120" value="12"> мес.</label>
+      <button class="btn accent" id="btn-load-url">Загрузить канал</button>
+    </div>
+    <p class="dim" id="url-hint">Ссылка работает, когда сервис запущен через сервер:
+      <code>python3 scripts/serve.py</code> → <code>http://127.0.0.1:8000</code>. Сервер сам скачает публичные
+      посты канала (текст, даты, просмотры, реакции) — выгрузка файлом при этом не нужна.</p>
+    <p class="dim">Данные обрабатываются в браузере и никуда не отправляются.</p>
+  </div>
+</section>
+
+<main id="app" class="hidden">
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="overview">Обзор</button>
+    <button class="tab" data-tab="dynamics">Динамика</button>
+    <button class="tab" data-tab="rhythm">Ритм</button>
+    <button class="tab" data-tab="topics">Темы</button>
+    <button class="tab" data-tab="anatomy">Анатомия и стиль</button>
+    <button class="tab" data-tab="connections">Связи постов</button>
+    <button class="tab" data-tab="compare">Сравнение каналов</button>
+    <button class="tab" data-tab="deep">Глубокий анализ</button>
+    <button class="tab" data-tab="actions">Что делать</button>
+    <button class="tab" data-tab="posts">Все посты</button>
+    <button class="tab" data-tab="method">Методика</button>
+  </nav>
+
+  <section id="panel-overview" class="panel on">
+    <div class="kpis" id="kpi-grid"></div>
+    <div class="grid-2">
+      <div class="card"><h3>Медиана и среднее просмотров по месяцам</h3><div id="chart-views-line" class="chart-host"></div></div>
+      <div class="card"><h3>Распределение постов по просмотрам</h3><div id="chart-views-hist" class="chart-host"></div>
+        <p class="dim">Логарифмическая шкала: длинный хвост слабых постов виден отдельно от «нормального» диапазона.</p></div>
+    </div>
+    <div class="card"><h3>Связь просмотров и реакций (каждая точка — пост)</h3><div id="chart-scatter" class="chart-host"></div>
+      <p class="dim">Точки ниже линии пропорциональности — посты, которые смотрят, но не поддерживают реакцией.</p></div>
+    <div class="grid-2">
+      <div class="card"><h3>Топ-10 постов по просмотрам</h3><div id="tbl-top"></div></div>
+      <div class="card"><h3>Выбросы: что зашло</h3><p class="dim" id="outliers-note"></p><div id="tbl-outliers"></div></div>
+    </div>
+    <div class="card hidden" id="compare-wrap">
+      <h3>Сравнение каналов</h3>
+      <div class="filters"><button class="btn small accent" id="btn-goto-compare">Открыть сравнение A/B со статистикой →</button>
+        <span class="dim">полный режим: значимость различий, распределения, темы, стиль, рейтинг</span></div>
+      <div id="tbl-compare"></div>
+    </div>
+  </section>
+
+  <section id="panel-dynamics" class="panel">
+    <div class="card"><h3>Публикаций по месяцам</h3><div id="chart-posts-month" class="chart-host"></div></div>
+    <div class="grid-2">
+      <div class="card"><h3>Вовлечённость по месяцам</h3><div id="chart-er-line" class="chart-host"></div>
+        <p class="dim">ER по просмотрам = реакции / просмотры. Если указано число подписчиков, добавляется ER по подписчикам.</p></div>
+      <div class="card"><h3 id="reach-title">Медиана просмотров по месяцам</h3><div id="chart-reach-line" class="chart-host"></div>
+        <p class="dim">Охват считается против указанного числа подписчиков — это снимок на сегодня, поэтому для старых месяцев значение является нижней оценкой.</p></div>
+    </div>
+    <div class="card"><h3>Недельная динамика</h3><div id="chart-week-line" class="chart-host"></div></div>
+    <div class="card"><h3>Срезы по годам</h3><div id="tbl-years"></div></div>
+  </section>
+
+  <section id="panel-rhythm" class="panel">
+    <div class="card"><h3>Когда публикует канал (число постов)</h3><div id="heat-count" class="chart-host"></div></div>
+    <div class="card"><h3>Когда посты собирают больше просмотров (медиана)</h3><div id="heat-views" class="chart-host"></div>
+      <p class="dim" id="rhythm-best"></p></div>
+    <div class="card"><h3>Загрузка по дням недели</h3><div id="chart-dow" class="chart-host"></div></div>
+  </section>
+
+  <section id="panel-topics" class="panel">
+    <div class="grid-2">
+      <div class="card"><h3>Доли тем</h3><div id="donut-topics" class="chart-host"></div></div>
+      <div class="card"><h3>Медиана просмотров по темам</h3><div id="chart-topics-views" class="chart-host"></div></div>
+    </div>
+    <div class="card"><h3>Темы: охват, вовлечённость и тренд</h3><div id="tbl-topics"></div>
+      <p class="dim">Тренд — изменение доли темы в последние 6 месяцев по сравнению со всей предыдущей историей.</p></div>
+  </section>
+
+  <section id="panel-anatomy" class="panel">
+    <div class="kpis" id="anatomy-kpi"></div>
+    <div class="grid-2">
+      <div class="card"><h3>Тип первой строки (зачин)</h3><div id="chart-hooks" class="chart-host"></div></div>
+      <div class="card"><h3>Системы разметки списков</h3><div id="chart-markers" class="chart-host"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3>Призывы к действию</h3><div id="chart-cta" class="chart-host"></div></div>
+      <div class="card"><h3>Частотные эмодзи</h3><div id="chart-emoji" class="chart-host"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3>Частые финальные строки</h3><div id="tbl-tails"></div></div>
+      <div class="card"><h3>Дисциплина текста</h3><div id="tbl-discipline"></div></div>
+    </div>
+  </section>
+
+  <section id="panel-connections" class="panel">
+    <div class="kpis" id="conn-stats"></div>
+    <div class="card"><h3>Граф связей постов</h3><div id="graph" class="chart-host"></div>
+      <p class="dim" id="graph-note"></p></div>
+    <div class="grid-2">
+      <div class="card"><h3>Группы дублей и почти-дублей</h3><div id="tbl-dups"></div></div>
+      <div class="card"><h3>Внешние каналы в ссылках</h3><div id="tbl-external"></div></div>
+    </div>
+    <div class="card"><h3>Ссылки внутри канала (пост → пост)</h3><div id="tbl-links"></div></div>
+    <div class="card"><h3>Тематические цепочки: рубрики подряд</h3><div id="tbl-chains"></div>
+      <p class="dim">Цепочка — посты одной темы подряд с интервалом ≤ 10 дней. Длинные цепочки = устойчивая рубрика, короткие = разовые новости.</p></div>
+    <div class="card"><h3>Рекламные размещения</h3><div id="tbl-ads"></div></div>
+  </section>
+
+  <section id="panel-compare" class="panel">
+    <div class="card">
+      <h3>Кого с чем сравниваем</h3>
+      <div class="filters" id="cmp-pickers"></div>
+      <p class="dim" id="cmp-note"></p>
+      <label class="chk"><input type="checkbox" id="cmp-overlap" checked>
+        сравнивать только по общему периоду — иначе сравниваются разные эпохи</label>
+    </div>
+    <div class="card"><h3>Профили каналов</h3><div id="cmp-profiles"></div></div>
+    <div class="card"><h3>Лицом к лицу: что доказано статистикой</h3><div id="tbl-h2h"></div>
+      <p class="dim">Числовые метрики — U-критерий Манна—Уитни, размер эффекта Клиффа. Доли — z-тест для двух долей,
+        размер эффекта — разница в процентных пунктах. «Различие не доказано» значит, что данных не хватает,
+        а не что каналы одинаковые.</p></div>
+    <div class="grid-2">
+      <div class="card"><h3>Распределение просмотров</h3><div id="cmp-box" class="chart-host"></div>
+        <p class="dim">Ящик — половина постов (P25–P75), усы — P10–P90. Видно не только медиану, но и разброс.</p></div>
+      <div class="card"><h3>Сколько постов в какой полосе</h3><div id="tbl-pct"></div></div>
+    </div>
+    <div class="card"><h3>Динамика: медиана просмотров по месяцам</h3>
+      <div id="chart-cmp-month" class="chart-host"></div>
+      <label class="chk"><input type="checkbox" id="cmp-index"> показать в процентах от первого месяца (сравнение формы, а не масштаба)</label></div>
+    <div class="card"><h3>Темы: доля и охват по каждому каналу</h3><div id="tbl-cmp-topics"></div>
+      <p class="dim">«Лучше своего обычного» — насколько медиана темы в канале выше его собственной медианы: так видно,
+        какие темы канал умеет, независимо от размера аудитории.</p></div>
+    <div class="card"><h3>Стиль и качество текста</h3><div id="tbl-cmp-style"></div></div>
+    <div class="card"><h3>Рейтинг всех загруженных каналов</h3>
+      <div class="filters"><label class="chk">показатель:
+        <select id="rank-metric"></select></label></div>
+      <div id="tbl-rank"></div>
+      <p class="dim" id="rank-note"></p></div>
+  </section>
+
+  <section id="panel-deep" class="panel">
+    <div class="card"><h3>Выводы: что происходит с каналом</h3>
+      <div id="findings" class="findings"></div>
+      <p class="dim">Каждый вывод опирается на число из этого отчёта: значимость — перестановочный тест (2000 перестановок),
+        интервалы — бутстрэп (1000 ресемплов), устойчивые выбросы — z по медиане и MAD.</p></div>
+
+    <div class="kpis" id="deep-kpi"></div>
+
+    <div class="card"><h3>Прогноз медианы просмотров на 3 месяца</h3>
+      <div id="chart-forecast" class="chart-host"></div>
+      <p class="dim" id="forecast-note"></p></div>
+
+    <div class="card"><h3>Динамика с точками перелома</h3>
+      <div id="chart-segments" class="chart-host"></div>
+      <p class="dim" id="changepoints-note"></p></div>
+
+    <div class="card"><h3>Что связано с просмотрами (признаки текста и формата)</h3>
+      <div id="tbl-drivers"></div>
+      <p class="dim">Медианы «с признаком» и «без признака», перестановочная значимость и размер эффекта Клиффа
+        (|d| &lt; 0.15 — слабый, 0.15–0.33 — заметный, больше — сильный). Признаки без значимости тоже показаны,
+        чтобы не принимать случайные колебания за закономерность.</p></div>
+
+    <div class="grid-2">
+      <div class="card"><h3>Слоты публикации с интервалами</h3><div id="tbl-slots"></div>
+        <p class="dim">«Выше среднего по каналу» — только если весь интервал слота выше верхней границы интервала канала.</p></div>
+      <div class="card"><h3>Время суток</h3><div id="chart-bands" class="chart-host"></div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card"><h3>Эффект соседства: интервал и предыдущий пост</h3><div id="tbl-neighbours"></div>
+        <p class="dim" id="neighbours-note"></p></div>
+      <div class="card"><h3>Дни с двумя и более постами</h3><div id="chart-burst" class="chart-host"></div>
+        <p class="dim" id="burst-note"></p></div>
+    </div>
+
+    <div class="card"><h3>Рубрики: охват, вовлечённость и значимость отличия</h3><div id="tbl-rubrics"></div>
+      <p class="dim">Рубрика определяется по шаблону текста (дайджест, карточки, аналитика, розыгрыш и т.д.).
+        «p» — вероятность увидеть такое отличие случайно; при p &gt; 0.05 отличие не доказано.</p></div>
+
+    <div class="grid-2">
+      <div class="card"><h3>Читабельность и дисциплина речи</h3><div id="tbl-copy"></div></div>
+      <div class="card"><h3>Штампы и канцелярит</h3><div id="tbl-cliche"></div></div>
+    </div>
+
+    <div class="card"><h3>Дрейф стиля по годам</h3><div id="tbl-drift"></div>
+      <p class="dim">Как менялись длина, эмодзи, кавычки, ссылки на источник и вопросы — видно, куда уехал стиль канала.</p></div>
+
+    <div class="card"><h3>Бенчмарк: место среди каналов пула</h3>
+      <div id="tbl-bench"></div>
+      <div class="filters">
+        <button class="btn small" id="btn-pool-add">Добавить канал в пул сравнения</button>
+        <button class="btn small" id="btn-pool-export">Экспорт пула</button>
+        <label class="btn small">Импорт пула<input type="file" id="pool-import" accept=".json" hidden></label>
+        <button class="btn small ghost" id="btn-pool-clear">Очистить пул</button>
+      </div>
+      <p class="dim" id="pool-note"></p></div>
+
+    <div class="card"><h3>Скорость набора просмотров (по замерам)</h3>
+      <div id="growth-note" class="dim"></div>
+      <div id="growth-kpi" class="kpis"></div>
+      <div id="chart-growth" class="chart-host"></div>
+      <div id="tbl-growth"></div>
+      <p class="dim">Замеры копятся командой <code>python3 scripts/snapshot.py https://t.me/канал</code>
+        (запускать раз в сутки): из двух и более снимков считается, сколько просмотров пост набирает в сутки,
+        когда рост прекращается и какое время насыщения у канала. Пока замера два и окно короткое,
+        выводы осторожные — скорость показана только по растущим постам.</p></div>
+
+    <div class="card"><h3>Аномалии и подозрительные записи</h3><div id="tbl-anomalies"></div>
+      <p class="dim">Устойчивые выбросы (z &gt; 3.5 по медиане и MAD) и посты с большим охватом без реакций —
+        кандидаты на проверку: накрутка, служебная запись или внешний трафик.</p></div>
+  </section>
+
+  <section id="panel-actions" class="panel">
+    <div class="card"><h3>Скоринг черновика: попадёт ли пост выше медианы канала</h3>
+      <div class="filters">
+        <label class="chk">плановый день:
+          <select id="score-dow">
+            <option value="0">Пн</option><option value="1">Вт</option><option value="2">Ср</option>
+            <option value="3">Чт</option><option value="4">Пт</option><option value="5">Сб</option><option value="6">Вс</option>
+          </select></label>
+        <label class="chk">час (UTC):
+          <select id="score-hour"></select></label>
+        <label class="chk">сколько постов выйдет в тот день:
+          <input type="number" id="score-daycount" value="1" min="1" max="10" step="1"></label>
+        <button class="btn small accent" id="btn-score">Оценить черновик</button>
+        <button class="btn small" id="btn-score-clear">Очистить</button>
+      </div>
+      <textarea id="draft" rows="9" placeholder="Вставьте текст поста — он посчитается по признакам, на которых обучена модель канала:&#10;&#10;📌&#10;Аренда жилья в России впервые с 2020 года подешевела&#10;..."></textarea>
+      <p class="dim" id="score-note"></p>
+      <div id="score-result"></div>
+      <div id="score-checklist"></div>
+    </div>
+
+    <div class="card"><h3>Что изменилось: A/B по дате</h3>
+      <div class="filters">
+        <label class="chk">дата изменения: <input type="date" id="ab-date"></label>
+        <label class="chk">окно сравнения, дней: <input type="number" id="ab-window" value="90" min="14" max="730" step="1"></label>
+        <button class="btn small accent" id="btn-ab">Сравнить до и после</button>
+      </div>
+      <p class="dim" id="ab-note"></p>
+      <div id="ab-result"></div>
+    </div>
+
+    <div class="card"><h3>План на неделю</h3>
+      <div class="filters">
+        <label class="chk">постов в неделю: <input type="number" id="plan-count" value="5" min="1" max="21" step="1"></label>
+        <button class="btn small accent" id="btn-plan">Собрать план</button>
+      </div>
+      <p class="dim" id="plan-note"></p>
+      <div id="plan-result"></div>
+    </div>
+
+    <div class="card"><h3>Сводка для руководства</h3>
+      <div class="filters">
+        <button class="btn small accent" id="btn-onepager">Собрать и распечатать one-pager</button>
+        <span class="dim">одна страница: KPI, ключевые выводы, что делать — сразу в PDF через печать</span>
+      </div>
+      <div id="onepager-preview"></div>
+    </div>
+  </section>
+
+  <section id="panel-posts" class="panel">
+    <div class="filters">
+      <input id="post-search" type="search" placeholder="поиск по тексту поста…">
+      <select id="post-topic"><option value="">все темы</option></select>
+      <select id="post-sort">
+        <option value="date">сортировка: по дате</option>
+        <option value="views">по просмотрам</option>
+        <option value="er">по ER</option>
+        <option value="react">по реакциям</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="post-sort-mode"> по возрастанию</label>
+      <label class="chk">просмотров ≥ <input type="number" id="post-minviews" value="0" min="0" step="100"></label>
+    </div>
+    <p class="dim" id="posts-note"></p>
+    <div id="tbl-posts"></div>
+    <div class="pager" id="post-pager"></div>
+  </section>
+
+  <section id="panel-method" class="panel">
+    <div class="card prose" id="method-info"></div>
+  </section>
+
+</main>
+    </div><!-- /window-body -->
+
+    <div class="statusbar" id="xp-statusbar">
+      <div class="panel grow" id="xp-status-text">Готово</div>
+      <div class="panel" id="xp-status-channel">канал —</div>
+      <div class="panel" id="xp-status-posts">постов —</div>
+      <div class="panel" id="xp-status-theme">оформление: Windows XP</div>
+    </div>
+
+  </div><!-- /window -->
+
+  <div class="taskbar" id="xp-taskbar">
+    <button class="start" id="xp-start"><span class="flag"></span>пуск</button>
+    <div class="tasks">
+      <button class="task-btn active" id="xp-task-app"><span>▤</span><span id="xp-task-title">TG Analytics</span></button>
+    </div>
+    <div class="tray" title="Системный трей">
+      <span class="ico">🔊</span><span class="ico">🛡</span>
+      <span id="xp-clock">--:--</span>
+    </div>
+  </div>
+
+  <div class="startmenu" id="xp-startmenu">
+    <div class="sm-head" id="xp-sm-head">TG Analytics · разбор Telegram-каналов</div>
+    <div class="sm-body">
+      <button data-cmd="open-file">📄 Открыть выгрузку (.jsonl)…</button>
+      <button data-cmd="open-url">🔗 Канал по ссылке…</button>
+      <button data-cmd="export">💾 Экспорт JSON</button>
+      <button data-cmd="print">🖨 Печать / PDF</button>
+      <div class="sep"></div>
+      <button data-cmd="tab" data-arg="overview">📊 Обзор</button>
+      <button data-cmd="tab" data-arg="dynamics">📈 Динамика</button>
+      <button data-cmd="tab" data-arg="compare">⚖ Сравнение каналов</button>
+      <button data-cmd="tab" data-arg="deep">🔬 Глубокий анализ</button>
+      <button data-cmd="tab" data-arg="actions">✅ Что делать</button>
+      <div class="sep"></div>
+      <button data-cmd="theme" data-arg="xp">🎨 Оформление: Windows XP</button>
+      <button data-cmd="theme" data-arg="dark">🎨 Оформление: тёмная</button>
+      <button data-cmd="about">❓ О сервисе</button>
+    </div>
+    <div class="sm-foot"><button data-cmd="exit">Свернуть окно</button></div>
+  </div>
+
+</div><!-- /xp-desktop -->
+
+
+<div id="modal" class="modal"><div class="modal-box">
+  <button id="modal-close" class="modal-close">×</button>
+  <div id="modal-body"></div>
+</div></div>
+
+<div id="toast" class="toast"></div>
+
+<script src="assets/analytics.js"></script>
+<script src="assets/analytics2.js"></script>
+<script src="assets/compete.js"></script>
+<script src="assets/scoring.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/xp.js"></script>
+</body>
+</html>
